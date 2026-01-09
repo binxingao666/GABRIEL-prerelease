@@ -1,0 +1,61 @@
+{% import "snippets.jinja2" as snip %}
+{{ snip.single_entry(modality, text) }}
+
+Your task: analyze the game user interface design. For each attribute below, rate how strongly the provided game content manifests it.
+
+BEGIN UI DESIGN ATTRIBUTES
+{{ attributes | shuffled_dict }}
+END UI DESIGN ATTRIBUTES
+Each dictionary key is a UI design attribute. If a definition is provided, use it to anchor judgment; otherwise use your best consistent definition.
+
+BEGIN RATING SCALE
+{% if scale %}
+{{ scale }}
+{% else %}
+Use integers 0-100 (inclusive). low = poor/absent; high = excellent/strong; mid = moderate.
+Use the full range and every increment; do not round to 5s/10s.
+Extremes are rare: use near 0 only if truly absent and near 100 only if overwhelming.
+Use moderate intermediates (e.g. 19, 67, 32) to account for nuance where applicable.
+{% endif %}
+END RATING SCALE
+
+Method (per attribute): pick one exact integer. Stick to provided scale. Double-check before choosing extremes.
+
+Key aspects to consider for game UI design analysis:
+- Visual clarity and readability
+- Navigation intuitiveness
+- Information hierarchy
+- Aesthetic appeal and consistency
+- Responsiveness and feedback
+- Accessibility features
+- Color scheme and contrast
+- Icon and symbol clarity
+- Menu structure and organization
+- HUD design and screen real estate usage
+- Animation and transition quality
+- Customization options
+
+Rules:
+- Judge each attribute independently and separately from each other
+- Only measure the direct signal of each attribute alone in the content
+- Consider both functional usability and visual design
+
+Output JSON only, in following format:
+{
+	"<insert attribute name here>": <insert corresponding rating here>,
+	"<attribute name>": <corresponding rating>,
+	...
+}
+
+Attributes you are measuring in the content are: {{ attributes.keys() | shuffled }}
+Assess EVERY attribute; no drops. Use these attribute names verbatim, with absolutely no modification.
+Same case, same spelling, same punctuation, same formatting.
+
+{% if additional_instructions %}
+The user has provided the following additional instructions, clarifications, or labelled examples (if these provided, rely heavily on them to calibrate your judgment).
+If they conflict with the other instructions, these user instructions take precedence.
+
+BEGIN ADDITIONAL INSTRUCTIONS/CLARIFICATIONS
+{{ additional_instructions }}
+END ADDITIONAL INSTRUCTIONS/CLARIFICATIONS
+{% endif %}

@@ -36,6 +36,12 @@ from .tasks import (
     WhateverConfig,
     Ideate,
     IdeateConfig,
+    GameStoryline,
+    GameStorylineConfig,
+    GameRules,
+    GameRulesConfig,
+    GameUI,
+    GameUIConfig,
 )
 from .utils.openai_utils import get_all_responses
 from .utils.passage_viewer import view as _view_passages
@@ -67,6 +73,9 @@ __all__ = [
     "debias",
     "whatever",
     "view",
+    "game_storyline",
+    "game_rules",
+    "game_ui",
 ]
 
 async def rate(
@@ -2199,6 +2208,339 @@ async def whatever(
         response_fn=response_fn,
         get_all_responses_fn=get_all_responses_fn,
         **kwargs,
+    )
+
+
+async def game_storyline(
+    df: pd.DataFrame,
+    column_name: str,
+    *,
+    attributes: Dict[str, str],
+    save_dir: str,
+    additional_instructions: Optional[str] = None,
+    model: str = "gpt-5-mini",
+    n_parallels: int = 650,
+    n_runs: int = 1,
+    n_attributes_per_run: int = 8,
+    reset_files: bool = False,
+    use_dummy: bool = False,
+    file_name: str = "storyline.csv",
+    modality: str = "text",
+    reasoning_effort: Optional[str] = None,
+    reasoning_summary: Optional[str] = None,
+    search_context_size: str = "medium",
+    template_path: Optional[str] = None,
+    response_fn: Optional[Callable[..., Awaitable[Any]]] = None,
+    get_all_responses_fn: Optional[Callable[..., Awaitable[pd.DataFrame]]] = None,
+    **cfg_kwargs,
+) -> pd.DataFrame:
+    """Analyze game storyline and narrative elements. Output = 0-100 rating per attribute.
+
+    Example Use
+    -----------
+    Measure "plot_complexity", "character_depth", "narrative_pacing" in game descriptions.
+
+    Parameters
+    ----------
+    df:
+        Source DataFrame containing the game content to analyze.
+    column_name:
+        Column in ``df`` that holds the game storyline content (text, image, or
+        references depending on ``modality``).
+    attributes:
+        Mapping of storyline attribute names to natural-language descriptions
+        that the model should evaluate on a 0–100 scale.
+    save_dir:
+        Directory where raw responses and the aggregated ratings CSV are
+        written. Created if it does not exist.
+    additional_instructions:
+        Optional extra guidance injected into the prompt template.
+    model:
+        Model name passed through to the OpenAI Responses API.
+    n_parallels:
+        Maximum number of concurrent requests to issue.
+    n_runs:
+        Number of repeat rating passes to perform for each passage.
+    n_attributes_per_run:
+        Maximum number of attributes to include in a single prompt. Attributes
+        are split across prompts when this limit is exceeded.
+    reset_files:
+        When ``True`` existing outputs in ``save_dir`` are ignored and
+        regenerated.
+    use_dummy:
+        If ``True`` use deterministic dummy responses for offline testing.
+    file_name:
+        Basename (without the automatic ``_raw_responses`` suffix) for saved
+        artifacts.
+    modality:
+        One of ``"text"``, ``"entity"``, ``"web"``, ``"image"`` to control how
+        inputs are packaged into prompts.
+    reasoning_effort, reasoning_summary:
+        Optional OpenAI metadata that tunes reasoning depth and summary capture.
+    search_context_size:
+        Size hint forwarded to web-search capable models.
+    template_path:
+        Override the default storyline prompt template with a custom Jinja2 file.
+    response_fn:
+        Optional callable forwarded to :func:`gabriel.utils.openai_utils.get_all_responses`
+        that replaces the per-prompt model invocation.
+    get_all_responses_fn:
+        Optional callable that fully replaces :func:`gabriel.utils.openai_utils.get_all_responses`.
+    **cfg_kwargs:
+        Additional overrides applied to :class:`gabriel.tasks.game_storyline.GameStorylineConfig`.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Input DataFrame with one column per storyline attribute containing the
+        mean score across runs.
+    """
+    save_dir = os.path.expandvars(os.path.expanduser(save_dir))
+    os.makedirs(save_dir, exist_ok=True)
+    cfg = GameStorylineConfig(
+        attributes=attributes,
+        save_dir=save_dir,
+        file_name=file_name,
+        model=model,
+        n_parallels=n_parallels,
+        n_runs=n_runs,
+        n_attributes_per_run=n_attributes_per_run,
+        use_dummy=use_dummy,
+        additional_instructions=additional_instructions,
+        modality=modality,
+        reasoning_effort=reasoning_effort,
+        reasoning_summary=reasoning_summary,
+        search_context_size=search_context_size,
+        **cfg_kwargs,
+    )
+    return await GameStoryline(cfg, template_path=template_path).run(
+        df,
+        column_name,
+        reset_files=reset_files,
+        response_fn=response_fn,
+        get_all_responses_fn=get_all_responses_fn,
+    )
+
+
+async def game_rules(
+    df: pd.DataFrame,
+    column_name: str,
+    *,
+    attributes: Dict[str, str],
+    save_dir: str,
+    additional_instructions: Optional[str] = None,
+    model: str = "gpt-5-mini",
+    n_parallels: int = 650,
+    n_runs: int = 1,
+    n_attributes_per_run: int = 8,
+    reset_files: bool = False,
+    use_dummy: bool = False,
+    file_name: str = "rules.csv",
+    modality: str = "text",
+    reasoning_effort: Optional[str] = None,
+    reasoning_summary: Optional[str] = None,
+    search_context_size: str = "medium",
+    template_path: Optional[str] = None,
+    response_fn: Optional[Callable[..., Awaitable[Any]]] = None,
+    get_all_responses_fn: Optional[Callable[..., Awaitable[pd.DataFrame]]] = None,
+    **cfg_kwargs,
+) -> pd.DataFrame:
+    """Analyze game rules and mechanics. Output = 0-100 rating per attribute.
+
+    Example Use
+    -----------
+    Measure "rule_complexity", "strategic_depth", "learning_curve" in game descriptions.
+
+    Parameters
+    ----------
+    df:
+        Source DataFrame containing the game content to analyze.
+    column_name:
+        Column in ``df`` that holds the game rules/mechanics content.
+    attributes:
+        Mapping of game mechanics attribute names to natural-language descriptions
+        that the model should evaluate on a 0–100 scale.
+    save_dir:
+        Directory where raw responses and the aggregated ratings CSV are
+        written. Created if it does not exist.
+    additional_instructions:
+        Optional extra guidance injected into the prompt template.
+    model:
+        Model name passed through to the OpenAI Responses API.
+    n_parallels:
+        Maximum number of concurrent requests to issue.
+    n_runs:
+        Number of repeat rating passes to perform for each passage.
+    n_attributes_per_run:
+        Maximum number of attributes to include in a single prompt. Attributes
+        are split across prompts when this limit is exceeded.
+    reset_files:
+        When ``True`` existing outputs in ``save_dir`` are ignored and
+        regenerated.
+    use_dummy:
+        If ``True`` use deterministic dummy responses for offline testing.
+    file_name:
+        Basename (without the automatic ``_raw_responses`` suffix) for saved
+        artifacts.
+    modality:
+        One of ``"text"``, ``"entity"``, ``"web"``, ``"image"`` to control how
+        inputs are packaged into prompts.
+    reasoning_effort, reasoning_summary:
+        Optional OpenAI metadata that tunes reasoning depth and summary capture.
+    search_context_size:
+        Size hint forwarded to web-search capable models.
+    template_path:
+        Override the default rules prompt template with a custom Jinja2 file.
+    response_fn:
+        Optional callable forwarded to :func:`gabriel.utils.openai_utils.get_all_responses`
+        that replaces the per-prompt model invocation.
+    get_all_responses_fn:
+        Optional callable that fully replaces :func:`gabriel.utils.openai_utils.get_all_responses`.
+    **cfg_kwargs:
+        Additional overrides applied to :class:`gabriel.tasks.game_rules.GameRulesConfig`.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Input DataFrame with one column per game rules attribute containing the
+        mean score across runs.
+    """
+    save_dir = os.path.expandvars(os.path.expanduser(save_dir))
+    os.makedirs(save_dir, exist_ok=True)
+    cfg = GameRulesConfig(
+        attributes=attributes,
+        save_dir=save_dir,
+        file_name=file_name,
+        model=model,
+        n_parallels=n_parallels,
+        n_runs=n_runs,
+        n_attributes_per_run=n_attributes_per_run,
+        use_dummy=use_dummy,
+        additional_instructions=additional_instructions,
+        modality=modality,
+        reasoning_effort=reasoning_effort,
+        reasoning_summary=reasoning_summary,
+        search_context_size=search_context_size,
+        **cfg_kwargs,
+    )
+    return await GameRules(cfg, template_path=template_path).run(
+        df,
+        column_name,
+        reset_files=reset_files,
+        response_fn=response_fn,
+        get_all_responses_fn=get_all_responses_fn,
+    )
+
+
+async def game_ui(
+    df: pd.DataFrame,
+    column_name: str,
+    *,
+    attributes: Dict[str, str],
+    save_dir: str,
+    additional_instructions: Optional[str] = None,
+    model: str = "gpt-5-mini",
+    n_parallels: int = 650,
+    n_runs: int = 1,
+    n_attributes_per_run: int = 8,
+    reset_files: bool = False,
+    use_dummy: bool = False,
+    file_name: str = "ui.csv",
+    modality: str = "text",
+    reasoning_effort: Optional[str] = None,
+    reasoning_summary: Optional[str] = None,
+    search_context_size: str = "medium",
+    template_path: Optional[str] = None,
+    response_fn: Optional[Callable[..., Awaitable[Any]]] = None,
+    get_all_responses_fn: Optional[Callable[..., Awaitable[pd.DataFrame]]] = None,
+    **cfg_kwargs,
+) -> pd.DataFrame:
+    """Analyze game UI design. Output = 0-100 rating per attribute.
+
+    Example Use
+    -----------
+    Measure "visual_clarity", "navigation_intuitiveness", "aesthetic_appeal" in game UI descriptions or screenshots.
+
+    Parameters
+    ----------
+    df:
+        Source DataFrame containing the game UI content to analyze.
+    column_name:
+        Column in ``df`` that holds the UI content (text descriptions or image
+        references depending on ``modality``).
+    attributes:
+        Mapping of UI attribute names to natural-language descriptions that the
+        model should evaluate on a 0–100 scale.
+    save_dir:
+        Directory where raw responses and the aggregated ratings CSV are
+        written. Created if it does not exist.
+    additional_instructions:
+        Optional extra guidance injected into the prompt template.
+    model:
+        Model name passed through to the OpenAI Responses API.
+    n_parallels:
+        Maximum number of concurrent requests to issue.
+    n_runs:
+        Number of repeat rating passes to perform for each passage.
+    n_attributes_per_run:
+        Maximum number of attributes to include in a single prompt. Attributes
+        are split across prompts when this limit is exceeded.
+    reset_files:
+        When ``True`` existing outputs in ``save_dir`` are ignored and
+        regenerated.
+    use_dummy:
+        If ``True`` use deterministic dummy responses for offline testing.
+    file_name:
+        Basename (without the automatic ``_raw_responses`` suffix) for saved
+        artifacts.
+    modality:
+        One of ``"text"``, ``"entity"``, ``"web"``, ``"image"`` to control how
+        inputs are packaged into prompts. For UI analysis, ``"image"`` is often
+        most appropriate.
+    reasoning_effort, reasoning_summary:
+        Optional OpenAI metadata that tunes reasoning depth and summary capture.
+    search_context_size:
+        Size hint forwarded to web-search capable models.
+    template_path:
+        Override the default UI prompt template with a custom Jinja2 file.
+    response_fn:
+        Optional callable forwarded to :func:`gabriel.utils.openai_utils.get_all_responses`
+        that replaces the per-prompt model invocation.
+    get_all_responses_fn:
+        Optional callable that fully replaces :func:`gabriel.utils.openai_utils.get_all_responses`.
+    **cfg_kwargs:
+        Additional overrides applied to :class:`gabriel.tasks.game_ui.GameUIConfig`.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Input DataFrame with one column per UI attribute containing the mean
+        score across runs.
+    """
+    save_dir = os.path.expandvars(os.path.expanduser(save_dir))
+    os.makedirs(save_dir, exist_ok=True)
+    cfg = GameUIConfig(
+        attributes=attributes,
+        save_dir=save_dir,
+        file_name=file_name,
+        model=model,
+        n_parallels=n_parallels,
+        n_runs=n_runs,
+        n_attributes_per_run=n_attributes_per_run,
+        use_dummy=use_dummy,
+        additional_instructions=additional_instructions,
+        modality=modality,
+        reasoning_effort=reasoning_effort,
+        reasoning_summary=reasoning_summary,
+        search_context_size=search_context_size,
+        **cfg_kwargs,
+    )
+    return await GameUI(cfg, template_path=template_path).run(
+        df,
+        column_name,
+        reset_files=reset_files,
+        response_fn=response_fn,
+        get_all_responses_fn=get_all_responses_fn,
     )
 
 

@@ -47,6 +47,12 @@ _lazy_imports = {
     "DebiasRegressionResult": ".debias",
     "MeasurementMode": ".debias",
     "RemovalMethod": ".debias",
+    "GameStoryline": ".game_storyline",
+    "GameStorylineConfig": ".game_storyline",
+    "GameRules": ".game_rules",
+    "GameRulesConfig": ".game_rules",
+    "GameUI": ".game_ui",
+    "GameUIConfig": ".game_ui",
 }
 
 __all__ = list(_lazy_imports.keys())
