@@ -1,0 +1,6 @@
+tests/
+CLAUDE.md
+*.pyc
+*__pycache__*
+.vscode/
+.pytest_cache/

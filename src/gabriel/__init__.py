@@ -23,6 +23,9 @@ from .api import (
     view,
     bucket,
     seed,
+    game_storyline,
+    game_rules,
+    game_ui,
 )
 from .utils import load
 
@@ -52,6 +55,9 @@ __all__ = list(_tasks.__all__) + [
     "view",
     "bucket",
     "load",
+    "game_storyline",
+    "game_rules",
+    "game_ui",
 ]
 
 

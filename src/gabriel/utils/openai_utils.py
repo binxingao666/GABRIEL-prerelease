@@ -116,7 +116,21 @@ except Exception:
 from gabriel.utils.parsing import safe_json
 
 # single connection pool per process, keyed by base URL and created lazily
-_clients_async: Dict[Optional[str], openai.AsyncOpenAI] = {}
+_clients_async: Dict[Optional[str], Union[openai.AsyncOpenAI, openai.AsyncAzureOpenAI]] = {}
+
+# Azure API versions that require Chat Completions API instead of Responses API
+_AZURE_CHAT_COMPLETIONS_VERSIONS = {"2024-12-01-preview", "2024-10-01-preview", "2024-08-01-preview"}
+
+
+def _use_azure_chat_completions() -> bool:
+    """Check if we should use Azure Chat Completions API instead of Responses API."""
+    azure_api_key = os.getenv("AZURE_OPENAI_API_KEY")
+    azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
+    azure_api_version = os.getenv("AZURE_OPENAI_API_VERSION", "2024-12-01-preview")
+
+    if azure_api_key and azure_endpoint:
+        return azure_api_version in _AZURE_CHAT_COMPLETIONS_VERSIONS
+    return False
 
 
 def _progress_bar(*args: Any, verbose: bool = True, **kwargs: Any):
@@ -137,14 +151,45 @@ def _display_example_prompt(example_prompt: str, *, verbose: bool = True) -> Non
     print(textwrap.indent(example_prompt.strip("\n"), "  "))
 
 
-def _get_client(base_url: Optional[str] = None) -> openai.AsyncOpenAI:
-    """Return a cached ``AsyncOpenAI`` client for ``base_url``.
+def _get_client(base_url: Optional[str] = None) -> Union[openai.AsyncOpenAI, openai.AsyncAzureOpenAI]:
+    """Return a cached ``AsyncOpenAI`` or ``AsyncAzureOpenAI`` client.
+
+    If both ``AZURE_OPENAI_API_KEY`` and ``AZURE_OPENAI_ENDPOINT`` environment
+    variables are set, an Azure OpenAI client is returned. Otherwise, a standard
+    OpenAI client is returned.
 
     When ``base_url`` is ``None`` the default OpenAI endpoint is used.  A client
     is created on first use and reused for subsequent calls with the same base
     URL to benefit from connection pooling.
     """
 
+    azure_api_key = os.getenv("AZURE_OPENAI_API_KEY")
+    azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
+    azure_api_version = os.getenv("AZURE_OPENAI_API_VERSION", "2024-12-01-preview")
+
+    # Use Azure OpenAI if both API key and endpoint are specified
+    if azure_api_key is not None and azure_endpoint is not None:
+        cache_key = f"azure:{azure_endpoint}"
+        client = _clients_async.get(cache_key)
+        if client is None:
+            kwargs: Dict[str, Any] = {
+                "api_key": azure_api_key,
+                "azure_endpoint": azure_endpoint,
+                "api_version": azure_api_version,
+            }
+            if httpx is not None:
+                try:
+                    kwargs.setdefault(
+                        "timeout",
+                        httpx.Timeout(connect=10.0, read=None, write=None, pool=None),
+                    )
+                except Exception:
+                    pass
+            client = openai.AsyncAzureOpenAI(**kwargs)
+            _clients_async[cache_key] = client
+        return client
+
+    # Fall back to standard OpenAI client
     url = base_url or os.getenv("OPENAI_BASE_URL")
     key: Optional[str] = url
     client = _clients_async.get(key)
@@ -684,11 +729,24 @@ def _print_run_banner(
 
 
 def _require_api_key() -> str:
-    """Return the API key or raise a runtime error if missing."""
+    """Return the API key or raise a runtime error if missing.
+
+    Supports both standard OpenAI (OPENAI_API_KEY) and Azure OpenAI
+    (AZURE_OPENAI_API_KEY + AZURE_OPENAI_ENDPOINT).
+    """
+    # Check for Azure OpenAI credentials first
+    azure_api_key = os.getenv("AZURE_OPENAI_API_KEY")
+    azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
+    if azure_api_key and azure_endpoint:
+        return azure_api_key
+
+    # Fall back to standard OpenAI
     api_key = os.getenv("OPENAI_API_KEY")
     if not api_key:
         raise RuntimeError(
-            "OPENAI_API_KEY environment variable must be set or passed via OpenAIClient(api_key)."
+            "API key not found. Set either:\n"
+            "  - OPENAI_API_KEY for standard OpenAI, or\n"
+            "  - AZURE_OPENAI_API_KEY and AZURE_OPENAI_ENDPOINT for Azure OpenAI"
         )
     return api_key
 
@@ -1469,6 +1527,87 @@ def _build_params(
     return params
 
 
+def _convert_to_chat_completions_params(params: Dict[str, Any]) -> Dict[str, Any]:
+    """Convert Responses API params to Chat Completions API params for Azure."""
+    chat_params: Dict[str, Any] = {
+        "model": params.get("model", "gpt-4o"),
+    }
+
+    # Convert input to messages
+    input_data = params.get("input", [])
+    messages = []
+    for item in input_data:
+        role = item.get("role", "user")
+        content = item.get("content", "")
+        # Handle content that might be a list (multimodal)
+        if isinstance(content, list):
+            # For chat completions, we need to handle this differently
+            # Simple case: just extract text content
+            text_parts = []
+            for part in content:
+                if isinstance(part, dict):
+                    if part.get("type") == "input_text":
+                        text_parts.append(part.get("text", ""))
+                    elif part.get("type") == "text":
+                        text_parts.append(part.get("text", ""))
+                elif isinstance(part, str):
+                    text_parts.append(part)
+            content = "\n".join(text_parts) if text_parts else ""
+        messages.append({"role": role, "content": content})
+    chat_params["messages"] = messages
+
+    # Convert max_output_tokens to max_tokens
+    if "max_output_tokens" in params:
+        chat_params["max_tokens"] = params["max_output_tokens"]
+
+    # Temperature
+    if "temperature" in params:
+        chat_params["temperature"] = params["temperature"]
+
+    # JSON mode
+    if "text" in params:
+        text_format = params["text"].get("format", {})
+        if text_format.get("type") == "json_object":
+            chat_params["response_format"] = {"type": "json_object"}
+        elif text_format.get("type") == "json_schema":
+            # Azure may not support json_schema, fall back to json_object
+            chat_params["response_format"] = {"type": "json_object"}
+
+    return chat_params
+
+
+def _convert_chat_completion_to_response_format(chat_response: Any) -> Any:
+    """Convert Chat Completions API response to Responses API-like format."""
+    # Create a response object that mimics the Responses API format
+    class ResponseWrapper:
+        def __init__(self, chat_resp: Any):
+            self._chat_resp = chat_resp
+            self.id = chat_resp.id
+            self.model = chat_resp.model
+            self.status = "completed"
+            self.output = []
+            self.usage = chat_resp.usage
+
+            # Extract the text content from the first choice
+            first_content = ""
+            if chat_resp.choices:
+                first_content = chat_resp.choices[0].message.content or ""
+
+            # output_text is the main text response (required by get_response)
+            self.output_text = first_content
+
+            # Convert choices to output format
+            for choice in chat_resp.choices:
+                content = choice.message.content or ""
+                self.output.append({
+                    "type": "message",
+                    "role": "assistant",
+                    "content": [{"type": "output_text", "text": content}],
+                })
+
+    return ResponseWrapper(chat_response)
+
+
 async def get_response(
     prompt: str,
     *,
@@ -1859,16 +1998,35 @@ async def get_response(
         total_needed = max(n, 1)
         start = time.time()
         raw_new: List[Any] = []
-        new_tasks: List[asyncio.Task] = [
-            asyncio.create_task(
-                client_async.responses.create(
-                    **params, **({"timeout": timeout} if timeout is not None else {})
+
+        # Check if we should use Azure Chat Completions API instead of Responses API
+        use_chat_completions = _use_azure_chat_completions()
+
+        if use_chat_completions:
+            # Convert params for Chat Completions API
+            chat_params = _convert_to_chat_completions_params(params)
+            new_tasks: List[asyncio.Task] = [
+                asyncio.create_task(
+                    client_async.chat.completions.create(
+                        **chat_params, **({"timeout": timeout} if timeout is not None else {})
+                    )
                 )
-            )
-            for _ in range(total_needed)
-        ]
+                for _ in range(total_needed)
+            ]
+        else:
+            new_tasks: List[asyncio.Task] = [
+                asyncio.create_task(
+                    client_async.responses.create(
+                        **params, **({"timeout": timeout} if timeout is not None else {})
+                    )
+                )
+                for _ in range(total_needed)
+            ]
         try:
             raw_new = await asyncio.gather(*new_tasks)
+            # Convert Chat Completions responses to Responses API format if needed
+            if use_chat_completions:
+                raw_new = [_convert_chat_completion_to_response_format(r) for r in raw_new]
         except asyncio.CancelledError:
             for t in new_tasks:
                 t.cancel()
