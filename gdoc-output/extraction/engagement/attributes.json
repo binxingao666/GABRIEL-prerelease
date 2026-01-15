@@ -1,0 +1,7 @@
+{
+  "most_mentioned_member": "Which team member name appears most frequently in the Progress and Tasks sections?",
+  "least_mentioned_member": "Which team member name appears least frequently or is absent from Progress section?",
+  "cognitive_tasks_count": "How many tasks involve strategic thinking, planning, research, or decision-making (cognitive work)?",
+  "execution_tasks_count": "How many tasks involve implementation, building, coding, or routine execution work?",
+  "equal_distribution": "Does the work appear equally distributed among all members? (yes/somewhat/no)"
+}

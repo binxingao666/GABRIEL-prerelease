@@ -1,0 +1,7 @@
+{
+  "product_type": "What type of product is shown? (e.g., watch, shoe, electronics)",
+  "primary_color": "What is the dominant color of the product?",
+  "background_color": "What is the background color? (e.g., white, gradient, colored)",
+  "target_audience": "Who is the likely target audience? (e.g., young adults, professionals, athletes)",
+  "brand_style": "What brand style does this suggest? (e.g., luxury, sporty, minimalist, casual)"
+}

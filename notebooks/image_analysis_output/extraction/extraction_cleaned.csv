@@ -1,0 +1,6 @@
+image_id,image_path,filename,entity_name,product_type,primary_color,background_color,target_audience,brand_style
+img_0,/Users/pingzhili/my-github/GABRIEL-prerelease/examples/images/product_headphones.jpg,product_headphones.jpg,Black over-ear headphones,headphones,black,yellow,young adults,modern
+img_1,/Users/pingzhili/my-github/GABRIEL-prerelease/examples/images/product_shoe.jpg,product_shoe.jpg,Nike red running shoe,shoe,red,red,athletes,sporty
+img_2,/Users/pingzhili/my-github/GABRIEL-prerelease/examples/images/product_sneaker.jpg,product_sneaker.jpg,Colorful sneakers on white pedestal,shoes,white,white,young adults,casual
+img_3,/Users/pingzhili/my-github/GABRIEL-prerelease/examples/images/product_sunglasses.jpg,product_sunglasses.jpg,Ray-Ban sunglasses,sunglasses,black,white,young adults,casual
+img_4,/Users/pingzhili/my-github/GABRIEL-prerelease/examples/images/product_watch.jpg,product_watch.jpg,Minimalist wristwatch,watch,white,light gray,professionals,minimalist

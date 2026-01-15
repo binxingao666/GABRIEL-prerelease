@@ -1,0 +1,9 @@
+{
+  "task_concentration": "How concentrated is the work on just one or two people vs. distributed across all team members? (100 = one person does everything, 0 = perfectly distributed)",
+  "role_specialization": "How much do team members appear to specialize in certain types of tasks (e.g., one person always does tech, another marketing)? (100 = highly specialized roles, 0 = everyone does everything)",
+  "facilitator_evidence": "How much evidence is there of a de facto coordinator/facilitator who sets priorities, assigns tasks, or summarizes decisions? (100 = very clear leader, 0 = no coordination visible)",
+  "coordination_centralization": "How centralized is the coordination? (100 = one person controls all coordination, 0 = coordination is distributed/rotated)",
+  "task_tov_coherence": "How well do the tasks and priorities align with the stated theory of value/business model? (100 = perfect alignment, 0 = tasks seem disconnected from value proposition)",
+  "decision_selectivity": "How selective vs. inclusive are the team's decisions? (100 = very selective, narrowing down options, 0 = trying to accommodate many conflicting ideas)",
+  "strategy_consistency": "How consistent are the actions and decisions with the stated strategy/theory of value? (100 = perfect consistency, 0 = significant drift)"
+}

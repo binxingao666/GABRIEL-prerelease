@@ -1,0 +1,7 @@
+{
+  "tov_presence": "How clearly is a Theory of Value (business model, value proposition, cause-effect-value chain) articulated in this report? (100 = very clear and explicit, 0 = not mentioned at all)",
+  "tov_clarity": "How clear and understandable is the description of how the venture creates value for customers? (100 = crystal clear, 0 = confusing or absent)",
+  "tov_coherence": "How coherent is the logical chain from customer problem \u2192 solution \u2192 value creation? (100 = highly coherent, 0 = disconnected or illogical)",
+  "tov_experiment_link": "How well does the report connect experiments/tests to validating or refining the theory of value? (100 = strong explicit links, 0 = no connection)",
+  "tov_frankenstein": "Does the theory of value appear to be a 'Frankenstein' that tries to include too many disconnected ideas, rather than a focused, selective representation? (100 = very fragmented/unfocused, 0 = tightly focused)"
+}

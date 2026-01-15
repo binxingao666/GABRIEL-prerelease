@@ -1,0 +1,6 @@
+image_path,predicted_classes,image_id,filename,is_footwear,is_electronics,is_accessory
+/Users/pingzhili/my-github/GABRIEL-prerelease/examples/images/product_headphones.jpg,"[""is_electronics""]",img_0,product_headphones.jpg,False,True,False
+/Users/pingzhili/my-github/GABRIEL-prerelease/examples/images/product_shoe.jpg,"[""is_footwear""]",img_1,product_shoe.jpg,True,False,False
+/Users/pingzhili/my-github/GABRIEL-prerelease/examples/images/product_sneaker.jpg,"[""is_footwear""]",img_2,product_sneaker.jpg,True,False,False
+/Users/pingzhili/my-github/GABRIEL-prerelease/examples/images/product_sunglasses.jpg,"[""is_accessory""]",img_3,product_sunglasses.jpg,False,False,True
+/Users/pingzhili/my-github/GABRIEL-prerelease/examples/images/product_watch.jpg,"[""is_electronics"", ""is_accessory""]",img_4,product_watch.jpg,False,True,True

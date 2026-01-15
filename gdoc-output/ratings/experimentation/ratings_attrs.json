@@ -1,0 +1,7 @@
+{
+  "hypothesis_explicitness": "How explicit are the hypotheses the team is testing? (100 = clear, testable hypotheses stated, 0 = no hypotheses mentioned)",
+  "experiment_rigor": "How rigorous is the experimentation methodology (interviews, surveys, A/B tests, prototypes)? (100 = systematic and well-designed, 0 = ad hoc or absent)",
+  "hypothesis_test_chain": "How well does the report show a complete hypothesis \u2192 test \u2192 result \u2192 interpretation chain? (100 = complete chain visible, 0 = no connection between elements)",
+  "learning_evidence": "How much evidence of learning from experiments is shown (insights, pivots based on data, updated assumptions)? (100 = strong learning visible, 0 = no learning evident)",
+  "customer_voice": "How much is the customer voice present through interviews, surveys, or direct quotes? (100 = rich customer insights, 0 = no customer perspective)"
+}

@@ -1,0 +1,13 @@
+{
+  "team_members": "List all team member names mentioned, separated by commas",
+  "num_members": "How many team members are there? (number only)",
+  "report_week": "What week or date is this report for?",
+  "precision_score_total": "What is the total Precision Execution Score percentage? (number only, e.g., 90)",
+  "num_tasks_completed": "How many tasks have been completed or marked 'Yes' in the Tasks table?",
+  "num_tasks_pending": "How many tasks are still pending or in progress?",
+  "num_problems_listed": "How many problems are listed in the Problems section?",
+  "num_priorities_listed": "How many priorities are listed in the Priorities section?",
+  "has_theory_of_value": "Does this report explicitly mention or discuss a 'Theory of Value' or business model? (yes/no)",
+  "has_pivot_mentioned": "Does this report mention any pivot, change in direction, or shift in business idea? (yes/no)",
+  "has_first_sale": "Does this report mention achieving a first sale or customer? (yes/no)"
+}

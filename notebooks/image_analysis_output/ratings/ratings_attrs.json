@@ -1,0 +1,7 @@
+{
+  "visual_appeal": "How visually appealing is this product image? (100 = stunning, 0 = unappealing)",
+  "professionalism": "How professional does the product photography look? (100 = studio quality, 0 = amateur)",
+  "luxury_perception": "How luxurious does the product appear? (100 = very luxurious, 0 = budget/cheap)",
+  "minimalism": "How minimalist is the image composition? (100 = very minimal, 0 = cluttered)",
+  "innovation_feel": "How innovative or modern does the product look? (100 = cutting-edge, 0 = outdated)"
+}

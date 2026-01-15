@@ -80,3 +80,8 @@ OpenAI API
 - `OPENAI_API_KEY`: Required for real API calls
 - `OPENAI_BASE_URL`: Optional custom API endpoint
 - `JSON_LLM_MODEL`: Override default model (set to "dummy" in tests)
+
+## Rule
+
+-   We may communicate in Chinease, but always write Linus' style code and comments in English, 
+

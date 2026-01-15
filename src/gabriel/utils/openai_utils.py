@@ -1541,18 +1541,28 @@ def _convert_to_chat_completions_params(params: Dict[str, Any]) -> Dict[str, Any
         content = item.get("content", "")
         # Handle content that might be a list (multimodal)
         if isinstance(content, list):
-            # For chat completions, we need to handle this differently
-            # Simple case: just extract text content
-            text_parts = []
+            # For chat completions, convert multimodal content to proper format
+            converted_parts = []
             for part in content:
                 if isinstance(part, dict):
-                    if part.get("type") == "input_text":
-                        text_parts.append(part.get("text", ""))
-                    elif part.get("type") == "text":
-                        text_parts.append(part.get("text", ""))
+                    part_type = part.get("type", "")
+                    if part_type == "input_text":
+                        converted_parts.append({"type": "text", "text": part.get("text", "")})
+                    elif part_type == "text":
+                        converted_parts.append({"type": "text", "text": part.get("text", "")})
+                    elif part_type == "input_image":
+                        # Convert input_image to image_url format for Chat Completions API
+                        image_url = part.get("image_url", "")
+                        if isinstance(image_url, dict):
+                            image_url = image_url.get("url", "")
+                        if image_url:
+                            converted_parts.append({
+                                "type": "image_url",
+                                "image_url": {"url": image_url}
+                            })
                 elif isinstance(part, str):
-                    text_parts.append(part)
-            content = "\n".join(text_parts) if text_parts else ""
+                    converted_parts.append({"type": "text", "text": part})
+            content = converted_parts if converted_parts else ""
         messages.append({"role": role, "content": content})
     chat_params["messages"] = messages
 

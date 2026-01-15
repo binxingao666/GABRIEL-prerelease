@@ -1,0 +1,6 @@
+Identifier,Response,Web Search Sources,Time Taken,Input Tokens,Reasoning Tokens,Output Tokens,Reasoning Effort,Error Log,Response IDs,Successful
+bb7497a2_batch0,"[""{\n  \""is_footwear\"": false,\n  \""is_accessory\"": true,\n  \""is_electronics\"": true\n}""]",,2.4886369705200195,664,0,32,,[],['chatcmpl-CyOyrlYsYLZznDrHGgJ7iHqaNM1Ns'],True
+56552df5_batch0,"[""{\n  \""is_electronics\"": false,\n  \""is_accessory\"": true,\n  \""is_footwear\"": false\n}""]",,2.5966720581054688,784,0,32,,[],['chatcmpl-CyOyrdpukUU4jg01hO6eUaUgzJbdB'],True
+afbb3afc_batch0,"[""{\n  \""is_footwear\"": true,\n  \""is_electronics\"": false,\n  \""is_accessory\"": false\n}""]",,2.6251027584075928,640,0,32,,[],['chatcmpl-CyOyrqYag4fzl4N15eafwxvrAVPp6'],True
+35facb60_batch0,"[""{\n  \""is_accessory\"": false,\n  \""is_footwear\"": false,\n  \""is_electronics\"": true\n}""]",,2.6700868606567383,640,0,32,,[],['chatcmpl-CyOyrkqcJNL27bp17ivybia9aPB0V'],True
+659cf0c4_batch0,"[""{\n  \""is_accessory\"": false,\n  \""is_footwear\"": true,\n  \""is_electronics\"": false\n}""]",,2.8013458251953125,904,0,32,,[],['chatcmpl-CyOyrUBhLMkuCEJEXzUWbl2tTw61E'],True

@@ -1,0 +1,5 @@
+{
+  "is_footwear": "The product is a type of footwear (shoes, sneakers, boots, etc.)",
+  "is_electronics": "The product is electronics (headphones, phone, etc.)",
+  "is_accessory": "The product is a fashion accessory (watch, sunglasses, etc.)"
+}

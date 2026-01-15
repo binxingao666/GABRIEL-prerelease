@@ -1,0 +1,8 @@
+{
+  "technical_problems": "What percentage of the problems listed are technical issues (coding, website, API, platform limitations)? (0-100)",
+  "market_problems": "What percentage of the problems are market/customer-related (finding customers, market fit, competition)? (0-100)",
+  "team_problems": "What percentage of the problems are team process issues (coordination, communication, time management, conflict)? (0-100)",
+  "financial_problems": "What percentage of the problems are financial (funding, costs, pricing)? (0-100)",
+  "conflict_evidence": "How much evidence is there of internal disagreements or conflicts about direction? (100 = explicit conflicts, 0 = no conflicts mentioned)",
+  "problem_severity": "Overall, how severe are the problems described? (100 = critical blockers, 0 = minor issues)"
+}
